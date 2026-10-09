@@ -7,7 +7,9 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "android": {
       "package": "com.holyradius.app",
       "adaptiveIcon": {
@@ -49,6 +51,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5e430aeb-5bea-489a-8f8b-75aa80254956"
+      }
+    },
+    "owner": "sheeeraz"
   }
 }
