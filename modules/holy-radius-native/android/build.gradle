@@ -1,0 +1,21 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.holyradius'
+version = '0.1.0'
+
+android {
+  namespace "com.holyradius.nativecore"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+}
+
+dependencies {
+  implementation 'com.google.android.gms:play-services-location:21.3.0'
+  implementation 'androidx.work:work-runtime-ktx:2.10.1'
+  implementation 'androidx.core:core-ktx:1.13.1'
+}

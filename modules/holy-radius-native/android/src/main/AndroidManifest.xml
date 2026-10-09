@@ -1,0 +1,46 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+  <!-- WorkManager runs expedited work as a short foreground service below API 31 (see docs/decisions.md A2). -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+  <queries>
+    <package android:name="com.google.android.gms" />
+  </queries>
+
+  <application>
+    <receiver
+      android:name=".geofence.GeofenceReceiver"
+      android:exported="false" />
+
+    <!-- Exported only so the system can deliver its protected broadcasts. -->
+    <receiver
+      android:name=".recovery.SystemEventReceiver"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+        <!-- May not be delivered to manifest receivers on API 26+; Phase 1 records whether it arrives. -->
+        <action android:name="android.location.PROVIDERS_CHANGED" />
+      </intent-filter>
+    </receiver>
+
+    <receiver
+      android:name=".notify.NotificationActionReceiver"
+      android:exported="false" />
+
+    <provider
+      android:name=".diag.DiagFileProvider"
+      android:authorities="${applicationId}.holyradius.diag"
+      android:exported="false"
+      android:grantUriPermissions="true">
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/hr_diag_paths" />
+    </provider>
+  </application>
+</manifest>
