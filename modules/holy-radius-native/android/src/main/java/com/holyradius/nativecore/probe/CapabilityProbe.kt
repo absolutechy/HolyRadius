@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.common.ConnectionResult
@@ -69,8 +70,7 @@ object CapabilityProbe {
   private fun playServices(ctx: Context): Map<String, Any?> {
     val code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(ctx)
     val version = runCatching {
-      val info = ctx.packageManager.getPackageInfo("com.google.android.gms", 0)
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) info.longVersionCode else @Suppress("DEPRECATION") info.versionCode.toLong()
+      PackageInfoCompat.getLongVersionCode(ctx.packageManager.getPackageInfo("com.google.android.gms", 0))
     }.getOrNull()
     return mapOf("available" to (code == ConnectionResult.SUCCESS), "statusCode" to code, "version" to version)
   }

@@ -54,6 +54,9 @@ modules/holy-radius-native/                 local Expo module (autolinked from .
       ReRegistrationPolicy.kt               M7  when to re-register
       AtomicTextFile.kt                     M8  temp → fsync → rename writer
     config/PrototypeConfig.kt               centralized defaults (overridable from JS)
+    store/StateFiles.kt, ConfigStore.kt,    atomic JSON state files under filesDir/holyradius
+      GateStore.kt                          (registry, gate, evidence, session, config)
+    util/Tasks.kt, ProcessState.kt          Task.await, fg/bg process state
     diag/EventLog.kt                        M1
     probe/CapabilityProbe.kt                M2
     ringer/RingerController.kt              M3
@@ -63,6 +66,7 @@ modules/holy-radius-native/                 local Expo module (autolinked from .
     verify/VerificationWorker.kt            M6
     recovery/SystemEventReceiver.kt         M7
     recovery/ReRegisterWorker.kt            M7
+    recovery/SessionExpiryWorker.kt         M8  one-shot max-duration timer (notifies only)
     session/SessionStore.kt                 M8
     session/SessionCoordinator.kt           M8
     notify/Notifier.kt                      notifications + actions
@@ -154,9 +158,8 @@ Everything depends on this module.
 ### P1-M7 Re-registration triggers
 - `SystemEventReceiver` listens for:
   - `BOOT_COMPLETED`
-  - `LOCKED_BOOT_COMPLETED` (logged only)
   - `MY_PACKAGE_REPLACED`
-  - `PROVIDERS_CHANGED` (re-register only when location is on again)
+  - `PROVIDERS_CHANGED` (re-register only when location is on again). **Caveat:** this implicit broadcast may not reach manifest receivers on API 26+. Phase 1 records whether it arrives. If it doesn't, the fallbacks are geofence error 1000 (status → `not_available`) plus the launch reconcile.
 - Geofence error 1000 from M5 also triggers re-registration.
 - App launch: `ReRegistrationPolicy` (pure) compares the stored boot count, package update time and last status with current values. It re-registers only when they differ or the last status is not `registered`.
 - Every trigger enqueues one unique `ReRegisterWorker` (`ExistingWorkPolicy.KEEP`). A pending worker reads the current state when it runs, so it also covers later triggers. The worker:
@@ -181,6 +184,7 @@ The full state machine comes in Phase 3.
   - `PENDING` + current == applied → `OWNED`.
   - `PENDING` + current ≠ applied → discard.
   - `OWNED` past `maxUntil` → **notify** "Still on Vibrate — restore?". Sound is never restored blindly.
+- **Max-duration timer:** when a session becomes `OWNED`, a one-shot `SessionExpiryWorker` is scheduled at `maxUntil`. It runs `recover()`, which only notifies. It is cancelled when the session ends or is relinquished. No polling.
 - **Done when:**
   - A manual ringer change while inside → no restore.
   - The process is killed between steps → state is consistent after relaunch.

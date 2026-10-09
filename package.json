@@ -1,6 +1,6 @@
 {
-  "name": "hr",
-  "version": "1.0.0",
+  "name": "holyradius",
+  "version": "0.1.0",
   "main": "index.ts",
   "dependencies": {
     "expo": "~57.0.27",
@@ -20,17 +20,28 @@
   "devDependencies": {
     "@react-native/jest-preset": "^0.86.3",
     "@types/jest": "^29.5.14",
+    "@types/node": "^26.6.4",
     "@types/react": "~19.2.2",
     "jest": "^29.7.0",
     "jest-expo": "~57.0.5",
-    "react-dom": "^19.2.3",
+    "react-dom": "19.2.3",
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:native": "cd native-tests && gradle test",
+    "prebuild": "expo prebuild --platform android --clean"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "jest-expo",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/native-tests/",
+      "/android/"
+    ]
+  }
 }
